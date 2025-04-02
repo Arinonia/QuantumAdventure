@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.beryx.jlink' version '2.25.0'
+}
+
+group = 'fr.quantumadventure'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+application {
+    mainClass = 'fr.quantumadventure.SimpleGameApp'  // Modifié pour ton package
+}
+
+javafx {
+    version = '11'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing']
+}
+
+dependencies {
+    implementation 'com.github.almasb:fxgl:11.12'
+
+    // Garde les dépendances de test que tu avais
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jlink {
+    imageZip = project.file("${buildDir}/distributions/quantumadventure.zip")
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'QuantumAdventure'
+    }
+    //jlinkImageName = 'quantumadventure'
+    //jlinkZipName = 'quantumadventure'
+}
+
+// Configuration pour aider à l'exécution
+run {
+    jvmArgs = ['--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics']
+}
