@@ -3,8 +3,12 @@ package fr.quantumadventure;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import fr.quantumadventure.utils.Constants;
+import fr.quantumadventure.utils.logger.AnsiColor;
+import fr.quantumadventure.utils.logger.Logger;
 
 public class Game extends GameApplication {
+    private static final Logger log = Logger.getLogger(Game.class);
+
     @Override
     protected void initSettings(final GameSettings settings) {
         settings.setWidth(Constants.GAME_WIDTH);
@@ -14,23 +18,24 @@ public class Game extends GameApplication {
         settings.setAppIcon("images/icon.png");
     }
 
+
     @Override
     protected void initGame() {
-        System.out.println("Game initialized");
+        log.info("Initializing Game");
     }
 
     @Override
     protected void initPhysics() {
-        System.out.println("Physics initialized");
+        log.info("Initializing Physics");
     }
 
     @Override
     protected void initUI() {
-        System.out.println("UI initialized");
+        log.info("Initializing UI");
     }
 
     @Override
     protected void onUpdate(double tpf) {
-        System.out.println("Game updated");
+        log.debug("Updating UI:", Logger.colored("" + tpf, AnsiColor.GREEN));
     }
 }

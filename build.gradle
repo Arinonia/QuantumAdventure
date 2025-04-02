@@ -16,12 +16,12 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 application {
-    mainClass = 'fr.quantumadventure.SimpleGameApp'  // Modifié pour ton package
+    mainClass = 'fr.quantumadventure.SimpleGameApp'
 }
 
 javafx {
     version = '11'
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing', 'javafx.media']
 }
 
 dependencies {
