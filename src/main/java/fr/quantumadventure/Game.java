@@ -2,6 +2,8 @@ package fr.quantumadventure;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.*;
+import fr.quantumadventure.scene.MyStartupScene;
 import fr.quantumadventure.utils.Constants;
 import fr.quantumadventure.utils.logger.AnsiColor;
 import fr.quantumadventure.utils.logger.Logger;
@@ -11,13 +13,22 @@ public class Game extends GameApplication {
 
     @Override
     protected void initSettings(final GameSettings settings) {
+
+        settings.setSceneFactory(new SceneFactory() {
+            @Override
+            public StartupScene newStartup(int width, int height) {
+                return new MyStartupScene(width, height);
+            }
+        });
+
         settings.setWidth(Constants.GAME_WIDTH);
         settings.setHeight(Constants.GAME_HEIGHT);
         settings.setTitle(Constants.GAME_NAME);
         settings.setVersion(Constants.GAME_VERSION);
         settings.setAppIcon("images/icon.png");
-    }
 
+
+    }
 
     @Override
     protected void initGame() {

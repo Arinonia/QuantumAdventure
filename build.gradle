@@ -25,7 +25,7 @@ javafx {
 }
 
 dependencies {
-    implementation 'com.github.almasb:fxgl:11.12'
+    implementation 'com.github.almasb:fxgl:21.1'
 
     // Garde les dépendances de test que tu avais
     testImplementation platform('org.junit:junit-bom:5.10.0')
