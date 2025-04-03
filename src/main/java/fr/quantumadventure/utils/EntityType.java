@@ -10,6 +10,7 @@ public enum EntityType {
     TRAP(),
     CHEST(),
     PLATFORM(),
-    PORTAL();
+    PORTAL(),
+    DECORATION;
 
 }

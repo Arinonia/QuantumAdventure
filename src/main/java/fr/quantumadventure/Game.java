@@ -13,8 +13,9 @@ import fr.quantumadventure.ui.GameHUD;
 import fr.quantumadventure.utils.Constants;
 import fr.quantumadventure.utils.EntityType;
 import fr.quantumadventure.utils.logger.Logger;
-import fr.quantumadventure.world.LevelManager;
 import fr.quantumadventure.world.WorldFactory;
+import fr.quantumadventure.world.tile.TileFactory;
+import fr.quantumadventure.world.tile.TileLevelManager;
 import javafx.scene.input.KeyCode;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
@@ -24,7 +25,8 @@ public class Game extends GameApplication {
     private Entity player;
     private PlayerComponent playerComponent;
     private CameraComponent cameraComponent;
-    private LevelManager levelManager;
+    private TileLevelManager tileLevelManager;
+    private boolean isChangingLevel = false;
 
     @Override
     protected void initSettings(final GameSettings settings) {
@@ -47,37 +49,65 @@ public class Game extends GameApplication {
 
         getGameWorld().addEntityFactory(new PlayerFactory());
         getGameWorld().addEntityFactory(new WorldFactory());
+        getGameWorld().addEntityFactory(new TileFactory());
 
-        this.levelManager = new LevelManager();
-        this.levelManager.loadLevel("waves");
+        this.tileLevelManager = new TileLevelManager();
+        this.tileLevelManager.loadLevel("waves");
 
-        // Dimensions du niveau actuel
-        int levelWidth = levelManager.getCurrentLevelWidth();
-        int levelHeight = levelManager.getCurrentLevelHeight();
+        int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
+        int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
 
-        // Création du joueur
-        this.player = spawn("player", 100, 100);
-        this.playerComponent = this.player.getComponent(PlayerComponent.class);
-
-        // Ajout de la composante caméra au joueur
-        this.cameraComponent = new CameraComponent(levelWidth, levelHeight);
-        this.player.addComponent(this.cameraComponent);
+        createPlayer(100, 100, levelWidth, levelHeight);
 
         getWorldProperties().setValue("score", 0);
     }
 
-    private void changeLevel(String levelId) {
+    private void createPlayer(final double x, final double y, final int levelWidth, final int levelHeight) {
+        if (this.player != null) {
+            this.player.removeFromWorld();
+            log.info("Removing old player entity");
+        }
+
+        this.player = spawn("player", x, y);
+        this.playerComponent = this.player.getComponent(PlayerComponent.class);
+
+        this.cameraComponent = new CameraComponent(levelWidth, levelHeight);
+        this.player.addComponent(this.cameraComponent);
+
+        log.info("Player created at position: " + x + ", " + y);
+    }
+
+    private void changeLevel(final String levelId) {
+        if (this.isChangingLevel) {
+            log.warn("Already changing level, ignoring request");
+            return;
+        }
+
+        this.isChangingLevel = true;
+        log.info("Starting level change to: " + levelId);
+
+        double playerX = this.player.getX();
+        double playerY = this.player.getY();
         int currentScore = getWorldProperties().getInt("score");
-        levelManager.loadLevel(levelId);
 
-        // Mise à jour des dimensions du monde pour la caméra
-        int levelWidth = levelManager.getCurrentLevelWidth();
-        int levelHeight = levelManager.getCurrentLevelHeight();
-        cameraComponent.setWorldDimensions(levelWidth, levelHeight);
+        getGameScene().getViewport().fade(() -> {
+            this.player.removeFromWorld();
 
-        player.setPosition(100, 100);
-        getWorldProperties().setValue("score", currentScore);
-        log.info("Changed to level: " + levelId);
+            this.tileLevelManager.loadLevel(levelId);
+
+            final int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
+            final int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
+
+            createPlayer(playerX, playerY, levelWidth, levelHeight);
+
+            getWorldProperties().setValue("score", currentScore);
+
+            log.info("Level changed to: " + levelId + ", player at: " + this.player.getX() + ", " + this.player.getY());
+
+            getGameScene().getViewport().flash(() -> {
+                this.isChangingLevel = false;
+            });
+        });
     }
 
     @Override
@@ -87,62 +117,82 @@ public class Game extends GameApplication {
         input.addAction(new UserAction("Move Right") {
             @Override
             protected void onAction() {
-                playerComponent.moveRight();
+                if (playerComponent != null && !isChangingLevel) {
+                    playerComponent.moveRight();
+                }
             }
 
             @Override
             protected void onActionEnd() {
-                playerComponent.stop();
+                if (playerComponent != null) {
+                    playerComponent.stop();
+                }
             }
         }, KeyCode.D);
 
         input.addAction(new UserAction("Move Left") {
             @Override
             protected void onAction() {
-                playerComponent.moveLeft();
+                if (playerComponent != null && !isChangingLevel) {
+                    playerComponent.moveLeft();
+                }
             }
 
             @Override
             protected void onActionEnd() {
-                playerComponent.stop();
+                if (playerComponent != null) {
+                    playerComponent.stop();
+                }
             }
         }, KeyCode.Q);
 
         input.addAction(new UserAction("Move Up") {
             @Override
             protected void onAction() {
-                playerComponent.moveUp();
+                if (playerComponent != null && !isChangingLevel) {
+                    playerComponent.moveUp();
+                }
             }
 
             @Override
             protected void onActionEnd() {
-                playerComponent.stop();
+                if (playerComponent != null) {
+                    playerComponent.stop();
+                }
             }
         }, KeyCode.Z);
 
         input.addAction(new UserAction("Move Down") {
             @Override
             protected void onAction() {
-                playerComponent.moveDown();
+                if (playerComponent != null && !isChangingLevel) {
+                    playerComponent.moveDown();
+                }
             }
 
             @Override
             protected void onActionEnd() {
-                playerComponent.stop();
+                if (playerComponent != null) {
+                    playerComponent.stop();
+                }
             }
         }, KeyCode.S);
 
         input.addAction(new UserAction("Interact") {
             @Override
             protected void onActionBegin() {
-                log.info("Interacting with object");
+                if (!isChangingLevel) {
+                    log.info("Interacting with object");
+                }
             }
         }, KeyCode.E);
 
         input.addAction(new UserAction("Special Ability") {
             @Override
             protected void onActionBegin() {
-                log.info("Using special ability");
+                if (!isChangingLevel) {
+                    log.info("Using special ability");
+                }
             }
         }, KeyCode.SPACE);
     }
@@ -153,7 +203,7 @@ public class Game extends GameApplication {
         getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.PLATFORM) {
             @Override
             protected void onCollisionBegin(final Entity player, final Entity obstacle) {
-                //PlayerComponent playerComponent = player.getComponent(PlayerComponent.class);
+                log.info("Player collided with platform/obstacle");
             }
         });
 
@@ -162,6 +212,7 @@ public class Game extends GameApplication {
             protected void onCollisionBegin(final Entity player, final Entity collectible) {
                 collectible.removeFromWorld();
                 inc("score", +10);
+                log.info("Collected item, score increased by 10");
             }
         });
 
@@ -171,6 +222,10 @@ public class Game extends GameApplication {
 
             @Override
             protected void onCollisionBegin(final Entity player, final Entity portal) {
+                if (isChangingLevel) {
+                    return;
+                }
+
                 final long currentTime = System.currentTimeMillis();
                 final long PORTAL_COOLDOWN_MS = 2000;
                 if (this.portalCooldown && (currentTime - this.lastPortalUseTime < PORTAL_COOLDOWN_MS)) {
@@ -180,7 +235,7 @@ public class Game extends GameApplication {
                 this.portalCooldown = true;
                 this.lastPortalUseTime = currentTime;
 
-                final String currentLevel = levelManager.getCurrentLevelId();
+                final String currentLevel = tileLevelManager.getCurrentLevelId();
                 String nextLevel = "waves";
                 if ("waves".equals(currentLevel)) {
                     nextLevel = "particles";
@@ -188,13 +243,8 @@ public class Game extends GameApplication {
                     nextLevel = "waves";
                 }
 
-                log.info("Changing level from " + currentLevel + " to " + nextLevel);
+                log.info("Player initiated level change from " + currentLevel + " to " + nextLevel);
                 changeLevel(nextLevel);
-            }
-
-            @Override
-            protected void onCollisionEnd(final Entity player, final Entity portal) {
-
             }
         });
     }
