@@ -2,20 +2,21 @@ package fr.quantumadventure;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.level.tiled.TMXLevelLoader;
+import com.almasb.fxgl.entity.level.tiled.TiledMap;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.physics.CollisionHandler;
 import fr.quantumadventure.components.CameraComponent;
 import fr.quantumadventure.components.PlayerComponent;
+import fr.quantumadventure.entity.GameEntityFactory;
 import fr.quantumadventure.entity.PlayerFactory;
 import fr.quantumadventure.ui.GameHUD;
 import fr.quantumadventure.utils.Constants;
 import fr.quantumadventure.utils.EntityType;
 import fr.quantumadventure.utils.logger.Logger;
-import fr.quantumadventure.world.WorldFactory;
-import fr.quantumadventure.world.tile.TileFactory;
-import fr.quantumadventure.world.tile.TileLevelManager;
 import javafx.scene.input.KeyCode;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
@@ -25,7 +26,6 @@ public class Game extends GameApplication {
     private Entity player;
     private PlayerComponent playerComponent;
     private CameraComponent cameraComponent;
-    private TileLevelManager tileLevelManager;
     private boolean isChangingLevel = false;
 
     @Override
@@ -47,17 +47,26 @@ public class Game extends GameApplication {
     protected void initGame() {
         log.info("Initializing Game");
 
+        getGameWorld().addEntityFactory(new GameEntityFactory());
         getGameWorld().addEntityFactory(new PlayerFactory());
-        getGameWorld().addEntityFactory(new WorldFactory());
-        getGameWorld().addEntityFactory(new TileFactory());
+        // Charge la map depuis les assets
+//        var map = FXGL.getAssetLoader().loadLevel("maps/test.tmx", new TMXLevelLoader());
+        var map = getAssetLoader().loadLevel("maps/test.tmx", new TMXLevelLoader());
 
-        this.tileLevelManager = new TileLevelManager();
-        this.tileLevelManager.loadLevel("waves");
+        // Applique la carte au monde du jeu
+//        FXGL.getGameWorld().setLevel(map);
+        getGameWorld().setLevel(map);
 
-        int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
-        int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
+//        getGameWorld().addEntityFactory(new WorldFactory());
+//        getGameWorld().addEntityFactory(new TileFactory());
 
-        createPlayer(100, 100, levelWidth, levelHeight);
+//        this.tileLevelManager = new TileLevelManager();
+//        this.tileLevelManager.loadLevel("waves");
+
+//        int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
+//        int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
+
+        createPlayer(100, 100, map.getWidth(), map.getHeight());
 
         getWorldProperties().setValue("score", 0);
     }
@@ -93,12 +102,12 @@ public class Game extends GameApplication {
         getGameScene().getViewport().fade(() -> {
             this.player.removeFromWorld();
 
-            this.tileLevelManager.loadLevel(levelId);
+//            this.tileLevelManager.loadLevel(levelId);
 
-            final int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
-            final int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
+//            final int levelWidth = this.tileLevelManager.getCurrentLevelWidth();
+//            final int levelHeight = this.tileLevelManager.getCurrentLevelHeight();
 
-            createPlayer(playerX, playerY, levelWidth, levelHeight);
+//            createPlayer(playerX, playerY, levelWidth, levelHeight);
 
             getWorldProperties().setValue("score", currentScore);
 
@@ -200,7 +209,7 @@ public class Game extends GameApplication {
     @Override
     protected void initPhysics() {
         getPhysicsWorld().setGravity(0, 0);
-        getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.PLATFORM) {
+        /*getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.PLATFORM) {
             @Override
             protected void onCollisionBegin(final Entity player, final Entity obstacle) {
                 log.info("Player collided with platform/obstacle");
@@ -235,16 +244,23 @@ public class Game extends GameApplication {
                 this.portalCooldown = true;
                 this.lastPortalUseTime = currentTime;
 
-                final String currentLevel = tileLevelManager.getCurrentLevelId();
-                String nextLevel = "waves";
-                if ("waves".equals(currentLevel)) {
-                    nextLevel = "particles";
-                } else if ("particles".equals(currentLevel)) {
-                    nextLevel = "waves";
-                }
+//                final String currentLevel = tileLevelManager.getCurrentLevelId();
+//                String nextLevel = "waves";
+//                if ("waves".equals(currentLevel)) {
+//                    nextLevel = "particles";
+//                } else if ("particles".equals(currentLevel)) {
+//                    nextLevel = "waves";
+//                }
+//
+//                log.info("Player initiated level change from " + currentLevel + " to " + nextLevel);
+//                changeLevel(nextLevel);
+            }
+        });*/
 
-                log.info("Player initiated level change from " + currentLevel + " to " + nextLevel);
-                changeLevel(nextLevel);
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.WALL) {
+            @Override
+            protected void onCollision(Entity player, Entity wall) {
+                System.out.println("Le joueur touche un mur !");
             }
         });
     }

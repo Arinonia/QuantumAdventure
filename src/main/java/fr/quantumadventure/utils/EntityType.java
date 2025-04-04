@@ -2,6 +2,7 @@ package fr.quantumadventure.utils;
 
 public enum EntityType {
     PLAYER(),
+    WALL(),
     ENEMY(),
     NPC(),
     ITEM(),
