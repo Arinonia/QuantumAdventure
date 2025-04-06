@@ -152,6 +152,7 @@ public class Game {
             if (currentTile != null && currentTile.getType() == TileType.PORTAL) {
                 TileMap newMap = this.tileManager.changeMap(player);
                 this.collisionManager.setCurrentMap(newMap);
+                this.currentMap = newMap;
             }
         }
 
