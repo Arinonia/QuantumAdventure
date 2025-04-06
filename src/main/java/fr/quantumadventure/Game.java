@@ -2,8 +2,10 @@ package fr.quantumadventure;
 
 import fr.quantumadventure.input.KeyInputManager;
 import fr.quantumadventure.manager.CollisionManager;
+import fr.quantumadventure.manager.TileManager;
 import fr.quantumadventure.tile.Tile;
 import fr.quantumadventure.tile.TileMap;
+import fr.quantumadventure.tile.TileType;
 import fr.quantumadventure.tile.WorldManager;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -28,12 +30,11 @@ public class Game {
 
     private final KeyInputManager keyInputManager;
     private final CollisionManager collisionManager;
-
+    private final TileManager tileManager;
     private final Player player;
     private WorldManager worldManager;
     private TileMap currentMap;
     private Camera camera;
-    private int score = 0;
 
     private AnimationTimer gameLoop;
 
@@ -61,12 +62,12 @@ public class Game {
         this.root.getChildren().add(this.viewport);
 
         this.collisionManager = new CollisionManager();
+        this.tileManager = new TileManager(this.gamePane);
 
         this.worldManager = new WorldManager();
         this.worldManager.initMaps();
 
-        this.currentMap = this.worldManager.loadMap("waves");
-        this.gamePane.getChildren().add(this.currentMap.getView());
+        this.currentMap = this.tileManager.loadMap("waves");
         this.collisionManager.setCurrentMap(this.currentMap);
 
         this.player = new Player(32, 32);
@@ -145,7 +146,14 @@ public class Game {
             this.player.stop();
         }
 
-        checkSpecialTiles();
+        if (this.tileManager.checkSpecialTiles(player)) {
+            Tile currentTile = getCurrentTileAtPlayerCenter();
+
+            if (currentTile != null && currentTile.getType() == TileType.PORTAL) {
+                TileMap newMap = this.tileManager.changeMap(player);
+                this.collisionManager.setCurrentMap(newMap);
+            }
+        }
 
         this.player.update();
 
@@ -153,55 +161,14 @@ public class Game {
                 this.currentMap.getPixelWidth(), this.currentMap.getPixelHeight());
     }
 
-    private void checkSpecialTiles() {
-        double centerX = this.player.getX() + this.player.getWidth() / 2;
-        double centerY = this.player.getY() + this.player.getHeight() / 2;
+    private Tile getCurrentTileAtPlayerCenter() {
+        double centerX = player.getX() + player.getWidth() / 2;
+        double centerY = player.getY() + player.getHeight() / 2;
 
         int tileX = (int) (centerX / Tile.TILE_SIZE);
         int tileY = (int) (centerY / Tile.TILE_SIZE);
 
-        Tile currentTile = this.currentMap.getTile(tileX, tileY);
-        if (currentTile != null) {
-            switch (currentTile.getType()) {
-                case COLLECTIBLE:
-                    collectItem(tileX, tileY);
-                    break;
-                case PORTAL:
-                    changeMap();
-                    break;
-            }
-        }
-    }
-
-    private void collectItem(int x, int y) {
-        String currentMapId = this.worldManager.getCurrentMapId();
-        if ("waves".equals(currentMapId)) {
-            this.currentMap.setTile(x, y, Tile.createGrass());
-        } else if ("particles".equals(currentMapId)) {
-            this.currentMap.setTile(x, y, Tile.createSand());
-        } else {
-            this.currentMap.setTile(x, y, Tile.createGrass());
-        }
-
-        this.score += 10;
-    }
-
-    private void changeMap() {
-        String currentMapId = this.worldManager.getCurrentMapId();
-        String nextMapId = "waves";
-
-        if ("waves".equals(currentMapId)) {
-            nextMapId = "particles";
-        } else if ("particles".equals(currentMapId)) {
-            nextMapId = "waves";
-        }
-
-        this.gamePane.getChildren().remove(this.currentMap.getView());
-        this.currentMap = this.worldManager.loadMap(nextMapId);
-        this.collisionManager.setCurrentMap(this.currentMap);
-        this.gamePane.getChildren().add(this.currentMap.getView());
-        this.player.setPosition(100, 100);
-        this.player.getView().toFront();
+        return tileManager.getCurrentMap().getTile(tileX, tileY);
     }
 
     public void start() {
