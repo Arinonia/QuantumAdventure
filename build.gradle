@@ -1,0 +1,21 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+}
+
+application {
+    mainClass = 'fr.quantumadventure.Main'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+javafx {
+    version = "21"
+    modules = [ 'javafx.controls', 'javafx.graphics', 'javafx.fxml', 'javafx.media', 'javafx.swing' ]
+}
