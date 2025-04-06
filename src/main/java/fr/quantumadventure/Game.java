@@ -95,29 +95,59 @@ public class Game {
         double oldX = this.player.getX();
         double oldY = this.player.getY();
 
+        double newX = oldX;
+        double newY = oldY;
 
-        if (isKeyPressed(KeyCode.Z)) {
-            this.player.moveUp(deltaTime);
-        }
-        if (isKeyPressed(KeyCode.S)) {
-            this.player.moveDown(deltaTime);
+        boolean movedX = false;
+        boolean movedY = false;
+
+        if (isKeyPressed(KeyCode.D)) {
+            newX += this.player.getSpeed() * deltaTime;
+            movedX = true;
         }
         if (isKeyPressed(KeyCode.Q)) {
-            this.player.moveLeft(deltaTime);
-        }
-        if (isKeyPressed(KeyCode.D)) {
-            this.player.moveRight(deltaTime);
+            newX -= this.player.getSpeed() * deltaTime;
+            movedX = true;
         }
 
-        handleTileCollisions(oldX, oldY);
+        if (movedX) {
+            this.player.setPosition(newX, oldY);
+            if (checkCollision()) {
+                this.player.setPosition(oldX, oldY);
+                newX = oldX;
+            }
+        }
+
+        if (isKeyPressed(KeyCode.Z)) {
+            newY -= this.player.getSpeed() * deltaTime;
+            movedY = true;
+        }
+        if (isKeyPressed(KeyCode.S)) {
+            newY += this.player.getSpeed() * deltaTime;
+            movedY = true;
+        }
+
+        if (movedY) {
+            this.player.setPosition(newX, newY);
+            if (checkCollision()) {
+                this.player.setPosition(newX, oldY);
+                newY = oldY;// useless for now
+            }
+        }
+
+        if (!movedX && !movedY) {
+            this.player.stop();
+        }
+
         checkSpecialTiles();
+
         this.player.update();
 
         this.camera.update(this.player.getX(), this.player.getY(),
                 this.currentMap.getPixelWidth(), this.currentMap.getPixelHeight());
     }
 
-    private void handleTileCollisions(double oldX, double oldY) {
+    private boolean checkCollision() {
         double playerWidth = this.player.getWidth();
         double playerHeight = this.player.getHeight();
 
@@ -128,19 +158,16 @@ public class Game {
                 {this.player.getX() + playerWidth - 1, this.player.getY() + playerHeight - 1}
         };
 
-        boolean collision = false;
         for (double[] point : points) {
             int tileX = (int) (point[0] / Tile.TILE_SIZE);
             int tileY = (int) (point[1] / Tile.TILE_SIZE);
 
             if (!isTileWalkable(tileX, tileY)) {
-                collision = true;
-                break;
+                return true;
             }
         }
-        if (collision) {
-            this.player.setPosition(oldX, oldY);
-        }
+
+        return false;
     }
 
     private boolean isTileWalkable(int tileX, int tileY) {
@@ -152,8 +179,8 @@ public class Game {
     }
 
     private void checkSpecialTiles() {
-        double centerX = player.getX() + player.getWidth() / 2;
-        double centerY = player.getY() + player.getHeight() / 2;
+        double centerX = this.player.getX() + this.player.getWidth() / 2;
+        double centerY = this.player.getY() + this.player.getHeight() / 2;
 
         int tileX = (int) (centerX / Tile.TILE_SIZE);
         int tileY = (int) (centerY / Tile.TILE_SIZE);
@@ -174,11 +201,11 @@ public class Game {
     private void collectItem(int x, int y) {
         String currentMapId = this.worldManager.getCurrentMapId();
         if ("waves".equals(currentMapId)) {
-            currentMap.setTile(x, y, Tile.createGrass());
+            this.currentMap.setTile(x, y, Tile.createGrass());
         } else if ("particles".equals(currentMapId)) {
-            currentMap.setTile(x, y, Tile.createSand());
+            this.currentMap.setTile(x, y, Tile.createSand());
         } else {
-            currentMap.setTile(x, y, Tile.createGrass());
+            this.currentMap.setTile(x, y, Tile.createGrass());
         }
         //currentMap.setTile(x, y, Tile.createGrass());
 

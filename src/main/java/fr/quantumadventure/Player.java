@@ -54,6 +54,10 @@ public class Player {
         updateViewPosition();
     }
 
+    public void stop() {
+
+    }
+
     public Rectangle getView() {
         return this.view;
     }
@@ -74,7 +78,13 @@ public class Player {
         return this.height;
     }
 
+    public double getSpeed() {
+        return SPEED;
+    }
+
     public Bounds getBounds() {
         return this.view.getBoundsInParent();
     }
+
+
 }
