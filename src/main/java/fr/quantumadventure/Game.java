@@ -1,5 +1,6 @@
 package fr.quantumadventure;
 
+import fr.quantumadventure.input.KeyInputManager;
 import fr.quantumadventure.tile.Tile;
 import fr.quantumadventure.tile.TileMap;
 import fr.quantumadventure.tile.WorldManager;
@@ -22,6 +23,7 @@ public class Game {
 
     private final Stage stage;
     private final Scene scene;
+    private final KeyInputManager keyInputManager;
     private final Pane root;
     private Pane viewport;
     private Pane gamePane;
@@ -32,7 +34,7 @@ public class Game {
     private Camera camera;
     private int score = 0;
 
-    private final Map<KeyCode, Boolean> keys = new HashMap<>();
+//    private final Map<KeyCode, Boolean> keys = new HashMap<>();
 
     private AnimationTimer gameLoop;
 
@@ -42,6 +44,7 @@ public class Game {
         this.viewport = new Pane();
         this.gamePane = new Pane();
         this.scene = new Scene(root, WIDTH, HEIGHT, Color.BLACK);
+        this.keyInputManager = new KeyInputManager(this.scene);
 
         this.stage.setTitle(TITLE);
         this.stage.setResizable(false);
@@ -71,15 +74,15 @@ public class Game {
 
         this.camera = new Camera(this.gamePane, this.viewport, WIDTH, HEIGHT);
 
-        setupInput();
+//        setupInput();
 
         createGameLoop();
     }
 
-    private void setupInput() {
+    /*private void setupInput() {
         this.scene.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
         this.scene.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
-    }
+    }*/
 
     private void createGameLoop() {
         this.gameLoop = new AnimationTimer() {
@@ -110,11 +113,11 @@ public class Game {
         boolean movedX = false;
         boolean movedY = false;
 
-        if (isKeyPressed(KeyCode.D)) {
+        if (this.keyInputManager.isKeyPressed(KeyCode.D)) {
             newX += this.player.getSpeed() * deltaTime;
             movedX = true;
         }
-        if (isKeyPressed(KeyCode.Q)) {
+        if (this.keyInputManager.isKeyPressed(KeyCode.Q)) {
             newX -= this.player.getSpeed() * deltaTime;
             movedX = true;
         }
@@ -127,11 +130,11 @@ public class Game {
             }
         }
 
-        if (isKeyPressed(KeyCode.Z)) {
+        if (this.keyInputManager.isKeyPressed(KeyCode.Z)) {
             newY -= this.player.getSpeed() * deltaTime;
             movedY = true;
         }
-        if (isKeyPressed(KeyCode.S)) {
+        if (this.keyInputManager.isKeyPressed(KeyCode.S)) {
             newY += this.player.getSpeed() * deltaTime;
             movedY = true;
         }
@@ -239,9 +242,9 @@ public class Game {
         this.player.getView().toFront();
     }
 
-    private boolean isKeyPressed(KeyCode code) {
+    /*private boolean isKeyPressed(KeyCode code) {
         return this.keys.getOrDefault(code, false);
-    }
+    }*/
 
     public void start() {
         this.stage.show();
