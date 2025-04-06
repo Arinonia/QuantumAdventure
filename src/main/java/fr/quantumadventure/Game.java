@@ -5,11 +5,13 @@ import fr.quantumadventure.tile.TileMap;
 import fr.quantumadventure.tile.WorldManager;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +46,13 @@ public class Game {
         this.stage.setTitle(TITLE);
         this.stage.setResizable(false);
         this.stage.setScene(scene);
+
+        final InputStream iconStream = getClass().getResourceAsStream("/images/icon.png");
+        if (iconStream != null) {
+            this.stage.getIcons().add(new Image(iconStream));
+        } else {
+            System.err.println("Icon not found");
+        }
 
         this.viewport.setPrefSize(WIDTH, HEIGHT);
         this.viewport.getChildren().add(this.gamePane);
