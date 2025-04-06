@@ -1,6 +1,7 @@
 package fr.quantumadventure;
 
 import fr.quantumadventure.input.KeyInputManager;
+import fr.quantumadventure.manager.CollisionManager;
 import fr.quantumadventure.tile.Tile;
 import fr.quantumadventure.tile.TileMap;
 import fr.quantumadventure.tile.WorldManager;
@@ -21,10 +22,12 @@ public class Game {
 
     private final Stage stage;
     private final Scene scene;
-    private final KeyInputManager keyInputManager;
     private final Pane root;
     private Pane viewport;
     private Pane gamePane;
+
+    private final KeyInputManager keyInputManager;
+    private final CollisionManager collisionManager;
 
     private final Player player;
     private WorldManager worldManager;
@@ -57,15 +60,16 @@ public class Game {
         this.viewport.getChildren().add(this.gamePane);
         this.root.getChildren().add(this.viewport);
 
-        this.root.getChildren().add(this.gamePane);
+        this.collisionManager = new CollisionManager();
 
         this.worldManager = new WorldManager();
         this.worldManager.initMaps();
 
         this.currentMap = this.worldManager.loadMap("waves");
         this.gamePane.getChildren().add(this.currentMap.getView());
+        this.collisionManager.setCurrentMap(this.currentMap);
 
-        this.player = new Player(100, 100);
+        this.player = new Player(32, 32);
         this.gamePane.getChildren().add(this.player.getView());
 
         this.camera = new Camera(this.gamePane, this.viewport, WIDTH, HEIGHT);
@@ -114,7 +118,7 @@ public class Game {
 
         if (movedX) {
             this.player.setPosition(newX, oldY);
-            if (checkCollision()) {
+            if (this.collisionManager.checkCollision(this.player)) {
                 this.player.setPosition(oldX, oldY);
                 newX = oldX;
             }
@@ -131,7 +135,7 @@ public class Game {
 
         if (movedY) {
             this.player.setPosition(newX, newY);
-            if (checkCollision()) {
+            if (this.collisionManager.checkCollision(this.player)) {
                 this.player.setPosition(newX, oldY);
                 newY = oldY;// useless for now
             }
@@ -147,37 +151,6 @@ public class Game {
 
         this.camera.update(this.player.getX(), this.player.getY(),
                 this.currentMap.getPixelWidth(), this.currentMap.getPixelHeight());
-    }
-
-    private boolean checkCollision() {
-        double playerWidth = this.player.getWidth();
-        double playerHeight = this.player.getHeight();
-
-        double[][] points = {
-                {this.player.getX(), this.player.getY()},
-                {this.player.getX() + playerWidth - 1, this.player.getY()},
-                {this.player.getX(), this.player.getY() + playerHeight - 1},
-                {this.player.getX() + playerWidth - 1, this.player.getY() + playerHeight - 1}
-        };
-
-        for (double[] point : points) {
-            int tileX = (int) (point[0] / Tile.TILE_SIZE);
-            int tileY = (int) (point[1] / Tile.TILE_SIZE);
-
-            if (!isTileWalkable(tileX, tileY)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isTileWalkable(int tileX, int tileY) {
-        if (tileX < 0 || tileX >= this.currentMap.getWidth() || tileY < 0 || tileY >= this.currentMap.getHeight()) {
-            return false;
-        }
-
-        return this.currentMap.isWalkable(tileX, tileY);
     }
 
     private void checkSpecialTiles() {
@@ -211,7 +184,6 @@ public class Game {
         }
 
         this.score += 10;
-        System.out.println("Objet collecté ! Score : " + this.score);
     }
 
     private void changeMap() {
@@ -226,6 +198,7 @@ public class Game {
 
         this.gamePane.getChildren().remove(this.currentMap.getView());
         this.currentMap = this.worldManager.loadMap(nextMapId);
+        this.collisionManager.setCurrentMap(this.currentMap);
         this.gamePane.getChildren().add(this.currentMap.getView());
         this.player.setPosition(100, 100);
         this.player.getView().toFront();
