@@ -13,8 +13,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Game {
     private static final int WIDTH = 800;
@@ -33,8 +31,6 @@ public class Game {
     private TileMap currentMap;
     private Camera camera;
     private int score = 0;
-
-//    private final Map<KeyCode, Boolean> keys = new HashMap<>();
 
     private AnimationTimer gameLoop;
 
@@ -74,15 +70,9 @@ public class Game {
 
         this.camera = new Camera(this.gamePane, this.viewport, WIDTH, HEIGHT);
 
-//        setupInput();
-
         createGameLoop();
     }
 
-    /*private void setupInput() {
-        this.scene.setOnKeyPressed(e -> this.keys.put(e.getCode(), true));
-        this.scene.setOnKeyReleased(e -> this.keys.put(e.getCode(), false));
-    }*/
 
     private void createGameLoop() {
         this.gameLoop = new AnimationTimer() {
@@ -219,7 +209,6 @@ public class Game {
         } else {
             this.currentMap.setTile(x, y, Tile.createGrass());
         }
-        //currentMap.setTile(x, y, Tile.createGrass());
 
         this.score += 10;
         System.out.println("Objet collecté ! Score : " + this.score);
@@ -241,10 +230,6 @@ public class Game {
         this.player.setPosition(100, 100);
         this.player.getView().toFront();
     }
-
-    /*private boolean isKeyPressed(KeyCode code) {
-        return this.keys.getOrDefault(code, false);
-    }*/
 
     public void start() {
         this.stage.show();

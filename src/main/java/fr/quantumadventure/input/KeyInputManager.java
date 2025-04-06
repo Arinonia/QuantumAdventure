@@ -11,21 +11,16 @@ public class KeyInputManager {
     private final Map<KeyCode, Boolean> keyStates = new HashMap<>();
 
     public KeyInputManager(Scene scene) {
-        scene.setOnKeyPressed(event -> {
-            keyStates.put(event.getCode(), true);
-        });
-
-        scene.setOnKeyReleased(event -> {
-            keyStates.put(event.getCode(), false);
-        });
+        scene.setOnKeyPressed(event -> this.keyStates.put(event.getCode(), true));
+        scene.setOnKeyReleased(event -> this.keyStates.put(event.getCode(), false));
     }
 
     public boolean isKeyPressed(KeyCode keyCode) {
-        return keyStates.getOrDefault(keyCode, false);
+        return this.keyStates.getOrDefault(keyCode, false);
     }
 
     public boolean isKeyReleased(KeyCode keyCode) {
-        return !keyStates.getOrDefault(keyCode, true);
+        return !this.keyStates.getOrDefault(keyCode, true);
     }
 
     public Map<KeyCode, Boolean> getKeyStates() {

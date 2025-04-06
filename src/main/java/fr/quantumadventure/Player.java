@@ -44,8 +44,8 @@ public class Player {
     }
 
     private void updateViewPosition() {
-        this.view.setTranslateX(x);
-        this.view.setTranslateY(y);
+        this.view.setTranslateX(this.x);
+        this.view.setTranslateY(this.y);
     }
 
     public void setPosition(double x, double y) {
