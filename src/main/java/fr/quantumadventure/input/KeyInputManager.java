@@ -4,10 +4,11 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class KeyInputManager {
 
-    private final HashMap<KeyCode, Boolean> keyStates = new HashMap<>();
+    private final Map<KeyCode, Boolean> keyStates = new HashMap<>();
 
     public KeyInputManager(Scene scene) {
         scene.setOnKeyPressed(event -> {
@@ -27,7 +28,7 @@ public class KeyInputManager {
         return !keyStates.getOrDefault(keyCode, true);
     }
 
-    public HashMap<KeyCode, Boolean> getKeyStates() {
+    public Map<KeyCode, Boolean> getKeyStates() {
         return keyStates;
     }
 }
