@@ -49,7 +49,7 @@ public class WorldManager {
     }
 
     private TileMap createParticlesMap() {
-        TileMap map = new TileMap(25, 20);
+        TileMap map = new TileMap(45, 30);
 
         for (int x = 0; x < map.getWidth(); x++) {
             for (int y = 0; y < map.getHeight(); y++) {
