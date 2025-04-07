@@ -1,6 +1,6 @@
 package fr.quantumadventure.manager;
 
-import fr.quantumadventure.Player;
+import fr.quantumadventure.entity.Player;
 import fr.quantumadventure.tile.Tile;
 import fr.quantumadventure.tile.TileMap;
 

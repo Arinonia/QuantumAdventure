@@ -1,5 +1,6 @@
 package fr.quantumadventure;
 
+import fr.quantumadventure.entity.Player;
 import fr.quantumadventure.input.KeyInputManager;
 import fr.quantumadventure.manager.CollisionManager;
 import fr.quantumadventure.manager.TileManager;
@@ -25,16 +26,16 @@ public class Game {
     private final Stage stage;
     private final Scene scene;
     private final Pane root;
-    private Pane viewport;
-    private Pane gamePane;
+    private final Pane viewport;
+    private final Pane gamePane;
 
     private final KeyInputManager keyInputManager;
     private final CollisionManager collisionManager;
     private final TileManager tileManager;
     private final Player player;
-    private WorldManager worldManager;
+    private final WorldManager worldManager;
     private TileMap currentMap;
-    private Camera camera;
+    private final Camera camera;
 
     private AnimationTimer gameLoop;
 
@@ -102,47 +103,32 @@ public class Game {
         double oldX = this.player.getX();
         double oldY = this.player.getY();
 
-        double newX = oldX;
-        double newY = oldY;
-
-        boolean movedX = false;
-        boolean movedY = false;
-
         if (this.keyInputManager.isKeyPressed(KeyCode.D)) {
-            newX += this.player.getSpeed() * deltaTime;
-            movedX = true;
+            this.player.moveRight(deltaTime);
         }
         if (this.keyInputManager.isKeyPressed(KeyCode.Q)) {
-            newX -= this.player.getSpeed() * deltaTime;
-            movedX = true;
+            this.player.moveLeft(deltaTime);
         }
 
-        if (movedX) {
-            this.player.setPosition(newX, oldY);
-            if (this.collisionManager.checkCollision(this.player)) {
-                this.player.setPosition(oldX, oldY);
-                newX = oldX;
-            }
+        if (this.collisionManager.checkCollision(this.player)) {
+            this.player.setPosition(oldX, this.player.getY());
         }
 
         if (this.keyInputManager.isKeyPressed(KeyCode.Z)) {
-            newY -= this.player.getSpeed() * deltaTime;
-            movedY = true;
+            this.player.moveUp(deltaTime);
         }
         if (this.keyInputManager.isKeyPressed(KeyCode.S)) {
-            newY += this.player.getSpeed() * deltaTime;
-            movedY = true;
+            this.player.moveDown(deltaTime);
         }
 
-        if (movedY) {
-            this.player.setPosition(newX, newY);
-            if (this.collisionManager.checkCollision(this.player)) {
-                this.player.setPosition(newX, oldY);
-                newY = oldY;// useless for now
-            }
+        if (this.collisionManager.checkCollision(this.player)) {
+            this.player.setPosition(this.player.getX(), oldY);
         }
 
-        if (!movedX && !movedY) {
+        if (!this.keyInputManager.isKeyPressed(KeyCode.D) &&
+                !this.keyInputManager.isKeyPressed(KeyCode.Q) &&
+                !this.keyInputManager.isKeyPressed(KeyCode.Z) &&
+                !this.keyInputManager.isKeyPressed(KeyCode.S)) {
             this.player.stop();
         }
 
